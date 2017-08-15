@@ -5,6 +5,7 @@ import StatusCard from './StatusCard'
 import SubscriptionsCard from './SubscriptionsCard'
 import MessagesCard from './MessagesCard'
 import SendMessageCard from './SendMessageCard'
+import { v4 as uuid } from 'uuid'
 
 const Container = styled.div`
   display: flex;
@@ -44,8 +45,25 @@ class SocketPanel extends Component {
   }
 
   onSubmit (event, message) {
-    this.setState({ messages: [{ event, message: JSON.parse(message) }, ...this.state.messages] })
-    this.props.socket.emit(event, JSON.parse(message))
+    const dataId = uuid()
+    const data = {
+      id: dataId,
+      event,
+      message: JSON.parse(message)
+    }
+
+    this.setState({ messages: [data, ...this.state.messages] })
+    this.props.socket.emit(event, JSON.parse(message), (...args) => {
+      this.setState({
+        messages: this.state.messages.map(m => {
+          if (m.id === dataId) {
+            return Object.assign({}, m, { ack: args })
+          } else {
+            return m
+          }
+        })
+      })
+    })
   }
 
   render () {

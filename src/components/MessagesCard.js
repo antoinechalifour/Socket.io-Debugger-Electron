@@ -31,10 +31,23 @@ class MessagesCard extends Component {
   render () {
     return (
       <Container>
-        {this.props.messages.map(({ event, message }) => (
+        {this.props.messages.map(({ event, message, ack = [] }) => (
           <Message>
             <Event>{event}</Event>
             <Payload>{JSON.stringify(message, null, 2)}</Payload>
+            {ack.length > 0 && (
+              <div>
+                <Event>ACK</Event>
+                {ack.map(value => {
+                  const display = typeof value === 'object' ? JSON.stringify(value, null, 2) : value
+                  return (
+                    <Payload>
+                      {display}
+                    </Payload>
+                  )
+                })}
+              </div>
+            )}
           </Message>
         ))}
       </Container>
